@@ -8,23 +8,59 @@ class MainWindow(object):
     def __init__(self):
         self.root = tkinter.Tk()
         self.root.title("Mijnlieff")
-        self.options_frame = tkinter.Frame(self.root)
-        self.options_frame.grid(row=0, column=0, columnspan=2, sticky="w")
-        self.new_game_button = tkinter.Button(self.options_frame, text="New Game", command=self.board_builder)
+        self.new_game_button = tkinter.Button(self.root, text="Start Game", font="veranda 14 bold",
+                                              command=self.start_game)
         self.new_game_button.grid(row=0, column=0)
-        self.restart_game_button = tkinter.Button(self.options_frame, text="Restart")
-        self.restart_game_button.grid(row=0, column=1)
-        self.options_button = tkinter.Button(self.options_frame, text="Options", command=self.game_option_window)
-        self.options_button.grid(row=0, column=2)
-        self.quit_game_button = tkinter.Button(self.options_frame, text="Quit")
-        self.quit_game_button.grid(row=0, column=3)
-        self.game_frame = tkinter.Frame(self.root, height=50)
-        self.game_frame.grid(row=1, column=0, columnspan=2)
-        self.p1_tile_frame = tkinter.Frame(self.root, height=50, bg="green")
-        self.p1_tile_frame.grid(row=2, column=0)
-        self.p2_tile_frame = tkinter.Frame(self.root, height=50, bg="red")
-        self.p2_tile_frame.grid(row=2, column=1)
+        self.menu_image = tkinter.PhotoImage(file="Square.gif")
+        self.shape_button = tkinter.Button(self.root, image=self.menu_image, font="verdana 10 bold",
+                                           command=self.shape_changer)
+        self.shape_button.grid(row=2, column=0)
+        self.shape_label = tkinter.Label(self.root, text="Select a board shape", font="verdana 8")
+        self.shape_label.grid(row=1, column=0)
         self.board_shape = 1
+
+    def shape_changer(self):
+        self.board_shape += 1
+        if self.board_shape > 5:
+            self.board_shape = 1
+        if self.board_shape == 1:
+            self.menu_image = tkinter.PhotoImage(file="Square.gif")
+        if self.board_shape == 2:
+            self.menu_image = tkinter.PhotoImage(file="Line.gif")
+        if self.board_shape == 3:
+            self.menu_image = tkinter.PhotoImage(file="L.gif")
+        if self.board_shape == 4:
+            self.menu_image = tkinter.PhotoImage(file="T.gif")
+        if self.board_shape == 5:
+            self.menu_image = tkinter.PhotoImage(file="S.gif")
+        self.shape_button = tkinter.Button(self.root, image=self.menu_image, font="verdana 10 bold",
+                                           command=self.shape_changer)
+        self.shape_button.grid(row=2, column=0)
+
+    def start_game(self):
+        game_window = tkinter.Toplevel(self.root)
+        game_window.title("Mijnlieff")
+        game_window.grab_set()
+
+        game = Game(game_window, self.board_shape)
+        print(game.board.board_list)
+        game.board_frame.grid(row=0, column=0, columnspan=2)
+        game.p1_tile_frame.grid(row=1, column=0)
+        game.p2_tile_frame.grid(row=1, column=1)
+
+
+class Game(object):
+    def __init__(self, frame, board_shape):
+        self.board_frame = tkinter.Frame(frame)
+        self.board_frame.grid(row=1, column=2, columnspan=2)
+        self.p1_tile_frame = tkinter.Frame(frame, height=50)
+        self.p1_tile_frame.grid(row=1, column=0)
+        self.p2_tile_frame = tkinter.Frame(frame, height=50)
+        self.p2_tile_frame.grid(row=1, column=4)
+
+        self.board = Board(board_shape, self.board_frame)
+        self.board.board_edge.grid(row=0, column=0)
+
         self.p1_tile_list = [Tile(1, 1, self.p1_tile_frame), Tile(1, 1, self.p1_tile_frame),
                              Tile(2, 1, self.p1_tile_frame), Tile(2, 1, self.p1_tile_frame),
                              Tile(3, 1, self.p1_tile_frame), Tile(3, 1, self.p1_tile_frame),
@@ -34,124 +70,83 @@ class MainWindow(object):
                              Tile(3, 2, self.p2_tile_frame), Tile(3, 2, self.p2_tile_frame),
                              Tile(4, 2, self.p2_tile_frame), Tile(4, 2, self.p2_tile_frame)]
 
-        self.board_list = []
-        for i in range(4):
-            b = BoardSection(self.game_frame)
-            self.board_list.append(b)
-
         self.p1_tile_list[0].label.grid(row=0, column=0)
-        self.p1_tile_list[1].label.grid(row=0, column=1)
-        self.p1_tile_list[2].label.grid(row=0, column=2)
-        self.p1_tile_list[3].label.grid(row=0, column=3)
-        self.p1_tile_list[4].label.grid(row=1, column=0)
-        self.p1_tile_list[5].label.grid(row=1, column=1)
-        self.p1_tile_list[6].label.grid(row=1, column=2)
+        self.p1_tile_list[1].label.grid(row=1, column=0)
+        self.p1_tile_list[2].label.grid(row=0, column=1)
+        self.p1_tile_list[3].label.grid(row=1, column=1)
+        self.p1_tile_list[4].label.grid(row=0, column=2)
+        self.p1_tile_list[5].label.grid(row=1, column=2)
+        self.p1_tile_list[6].label.grid(row=0, column=3)
         self.p1_tile_list[7].label.grid(row=1, column=3)
         self.p2_tile_list[0].label.grid(row=0, column=0)
-        self.p2_tile_list[1].label.grid(row=0, column=1)
-        self.p2_tile_list[2].label.grid(row=0, column=2)
-        self.p2_tile_list[3].label.grid(row=0, column=3)
-        self.p2_tile_list[4].label.grid(row=1, column=0)
-        self.p2_tile_list[5].label.grid(row=1, column=1)
-        self.p2_tile_list[6].label.grid(row=1, column=2)
+        self.p2_tile_list[1].label.grid(row=1, column=0)
+        self.p2_tile_list[2].label.grid(row=0, column=1)
+        self.p2_tile_list[3].label.grid(row=1, column=1)
+        self.p2_tile_list[4].label.grid(row=0, column=2)
+        self.p2_tile_list[5].label.grid(row=1, column=2)
+        self.p2_tile_list[6].label.grid(row=0, column=3)
         self.p2_tile_list[7].label.grid(row=1, column=3)
 
-    def board_builder(self):
-        if self.board_shape == 1:
-            self.board_list[0].square_frame.grid(row=0, column=0)
-            self.board_list[1].square_frame.grid(row=0, column=1)
-            self.board_list[2].square_frame.grid(row=1, column=0)
-            self.board_list[3].square_frame.grid(row=1, column=1)
-
-        elif self.board_shape == 2:
-            self.board_list[0].square_frame.grid(row=0, column=0)
-            self.board_list[1].square_frame.grid(row=0, column=1)
-            self.board_list[2].square_frame.grid(row=0, column=2)
-            self.board_list[3].square_frame.grid(row=0, column=3)
-
-        elif self.board_shape == 3:
-            self.board_list[0].square_frame.grid(row=0, column=0)
-            self.board_list[1].square_frame.grid(row=1, column=0)
-            self.board_list[2].square_frame.grid(row=1, column=1)
-            self.board_list[3].square_frame.grid(row=1, column=2)
-
-        elif self.board_shape == 4:
-            self.board_list[0].square_frame.grid(row=0, column=1)
-            self.board_list[1].square_frame.grid(row=1, column=0)
-            self.board_list[2].square_frame.grid(row=1, column=1)
-            self.board_list[3].square_frame.grid(row=1, column=2)
-
-        elif self.board_shape == 5:
-            self.board_list[0].square_frame.grid(row=0, column=0)
-            self.board_list[1].square_frame.grid(row=1, column=1)
-            self.board_list[2].square_frame.grid(row=1, column=0)
-            self.board_list[3].square_frame.grid(row=2, column=1)
-
-    def board_shape1(self):
-        self.board_shape = 1
-
-    def board_shape2(self):
-        self.board_shape = 2
-
-    def board_shape3(self):
-        self.board_shape = 3
-
-    def board_shape4(self):
-        self.board_shape = 4
-
-    def board_shape5(self):
-        self.board_shape = 5
-
-    def game_option_window(self):
-        global square_img
-        global line_img
-        global L_img
-        global T_img
-        global S_img
-        global options_window
-        options_window = tkinter.Toplevel()
-        options_window.title("Options")
-        options_window.grab_set()
-        select_label = tkinter.Label(options_window, text="Select a board shape").grid(row=0, column=0)
-        button_frame = tkinter.Frame(options_window, bg="green", height=50)
-        square_img = tkinter.PhotoImage(file="Square.gif")
-        square_button = tkinter.Button(button_frame, image=square_img, command=self.board_shape1)
-        line_img = tkinter.PhotoImage(file="Line.gif")
-        line_button = tkinter.Button(button_frame, image=line_img, command=self.board_shape2)
-        L_img = tkinter.PhotoImage(file="L.gif")
-        L_button = tkinter.Button(button_frame, image=L_img, command=self.board_shape3)
-        T_img = tkinter.PhotoImage(file="T.gif")
-        T_button = tkinter.Button(button_frame, image=T_img, command=self.board_shape4)
-        S_img = tkinter.PhotoImage(file="S.gif")
-        S_button = tkinter.Button(button_frame, image=S_img, command=self.board_shape5)
-
-        square_button.grid(row=0, column=0)
-        line_button.grid(row=0, column=2)
-        L_button.grid(row=1, column=1)
-        T_button.grid(row=2, column=0)
-        S_button.grid(row=2, column=2)
-
-        button_frame.grid(row=0, column=1)
 
 
-class Game(object):
-    def __init__(self):
-        pass
-    pass
+
+class Board(object):
+    def __init__(self, shape, window):
+        self.board_edge = tkinter.Frame(window)
+        self.board_list = []
+        if shape == 1:
+            self.board_build1(4, 4)
+
+        elif shape == 2:
+            self.board_build1(2, 8)
+
+        elif shape == 3:
+            self.board_build2(4, 0, 2, 1, 0, 6)
+
+        elif shape == 4:
+            self.board_build2(4, 2, 4, 1, 0, 6)
+
+        elif shape == 5:
+            self.board_build2(4, 2, 6, 1, 0, 4)
+
+    def board_build2(self, rows, col_start1, col_end1, row_switch, col_start2, col_end2):
+        for i in range(rows):
+            column_start = col_start1
+            column_end = col_end1
+            row_list = []
+            if i > row_switch:
+                column_start = col_start2
+                column_end = col_end2
+            for j in range(column_start, column_end):
+                b = BoardSquare(self.board_edge, i, j)
+                row_list.append(b)
+                row_list[j-column_start].square.grid(row=i, column=j)
+            self.board_list.append(row_list)
+
+    def board_build1(self, rows, columns):
+        for i in range(rows):
+            row_list = []
+            for j in range(columns):
+                b = BoardSquare(self.board_edge, i, j)
+                row_list.append(b)
+                row_list[j].square.grid(row=i, column=j)
+            self.board_list.append(row_list)
 
 
-class BoardSection(object):
-    def __init__(self, frame):
-        side = 110
-        self.square_frame = tkinter.Frame(frame)
-        self.subframe1 = tkinter.Frame(self.square_frame, height=side, width=side, bg="white")
-        self.subframe2 = tkinter.Frame(self.square_frame, height=side, width=side, bg="black")
-        self.subframe3 = tkinter.Frame(self.square_frame, height=side, width=side, bg="black")
-        self.subframe4 = tkinter.Frame(self.square_frame, height=side, width=side, bg="white")
-        self.subframe1.grid(row=0, column=0)
-        self.subframe2.grid(row=0, column=1)
-        self.subframe3.grid(row=1, column=0)
-        self.subframe4.grid(row=1, column=1)
+class BoardSquare(object):
+    def __init__(self, frame, row, column):
+        side = 21
+        height = 10
+        self.row = row
+        self.column = column
+        self.square = tkinter.Label(frame, height=height, width=side, relief="groove")
+        self.active = True
+
+    def active_switch(self):
+        if self.active:
+            self.active = False
+        else:
+            self.active = True
 
 
 class Tile(object):
@@ -164,33 +159,31 @@ class Tile(object):
         diagonalp2_img = tkinter.PhotoImage(file="diagonalp2.gif")
         pullerp2_img = tkinter.PhotoImage(file="pullerp2.gif")
         pusherp2_img = tkinter.PhotoImage(file="pusherp2.gif")
-        if p == 1:
-            if typ == 1:
-                self.label = tkinter.Label(frame, image=straightp1_img)
-                self.label.image = straightp1_img
-            elif typ == 2:
-                self.label = tkinter.Label(frame, image=diagonalp1_img)
-                self.label.image = diagonalp1_img
-            elif typ == 3:
-                self.label = tkinter.Label(frame, image=pullerp1_img)
-                self.label.image = pullerp1_img
-            elif typ == 4:
-                self.label = tkinter.Label(frame, image=pusherp1_img)
-                self.label.image = pusherp1_img
+        self.label = None
+        self.player = p
+        self.type = typ
+        if self.player == 1:
+            if self.type == 1:
+                self.tile_image(straightp1_img, frame)
+            elif self.type == 2:
+                self.tile_image(diagonalp1_img, frame)
+            elif self.type == 3:
+                self.tile_image(pullerp1_img, frame)
+            elif self.type == 4:
+                self.tile_image(pusherp1_img, frame)
         if p == 2:
-            if typ == 1:
-                self.label = tkinter.Label(frame, image=straightp2_img)
-                self.label.image = straightp2_img
-            elif typ == 2:
-                self.label = tkinter.Label(frame, image=diagonalp2_img)
-                self.label.image = diagonalp2_img
-            elif typ == 3:
-                self.label = tkinter.Label(frame, image=pullerp2_img)
-                self.label.image = pullerp2_img
-            elif typ == 4:
-                self.label = tkinter.Label(frame, image=pusherp2_img)
-                self.label.image = pusherp2_img
+            if self.type == 1:
+                self.tile_image(straightp2_img, frame)
+            elif self.type == 2:
+                self.tile_image(diagonalp2_img, frame)
+            elif self.type == 3:
+                self.tile_image(pullerp2_img, frame)
+            elif self.type == 4:
+                self.tile_image(pusherp2_img, frame)
 
+    def tile_image(self, image, frame):
+        self.label = tkinter.Label(frame, image=image)
+        self.label.image = image
 
 
 main_window = MainWindow()
