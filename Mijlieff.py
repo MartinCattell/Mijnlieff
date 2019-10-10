@@ -1,6 +1,4 @@
 import tkinter
-import keyboard
-import time
 
 
 class MainWindow(object):
@@ -63,8 +61,8 @@ class Game(object):
         self.p1_tile_list = [[Tile(1, 1, 0, self), Tile(2, 1, 0, self), Tile(3, 1, 0, self), Tile(4, 1, 0, self)],
                              [Tile(1, 1, 1, self), Tile(2, 1, 1, self), Tile(3, 1, 1, self),  Tile(4, 1, 1, self)]]
 
-        self.p2_tile_list = [[Tile(1, 2, 0, self), Tile(2, 2, 0, self), Tile(3, 2, 0, self), Tile(4, 2, 0, self)],
-                             [Tile(1, 2, 1, self), Tile(2, 2, 1, self), Tile(3, 2, 1, self),  Tile(4, 2, 1, self)]]
+        self.p2_tile_list = [[Tile(1, -1, 0, self), Tile(2, -1, 0, self), Tile(3, -1, 0, self), Tile(4, -1, 0, self)],
+                             [Tile(1, -1, 1, self), Tile(2, -1, 1, self), Tile(3, -1, 1, self),  Tile(4, -1, 1, self)]]
 
         self.p1_tile_list[0][0].label.grid(row=0, column=0)
         self.p1_tile_list[0][1].label.grid(row=0, column=1)
@@ -146,12 +144,6 @@ class BoardSquare(object):
         self.square.bind("<Button-1>", self.tile_placer)
         self.tiled = False
 
-    def active_switch(self):
-        if self.active:
-            self.active = False
-        else:
-            self.active = True
-
     def tile_placer(self, event):
         straightp1_img = tkinter.PhotoImage(file="straightp1.gif")
         diagonalp1_img = tkinter.PhotoImage(file="diagonalp1.gif")
@@ -179,8 +171,8 @@ class BoardSquare(object):
                     self.push_changer()
                     self.tile_image_place(pusherp1_img)
                 self.active = False
-                self.game.player_turn = 2
-            elif self.game.player_turn == 2:
+                self.turn_lose()
+            elif self.game.player_turn == -1:
                 self.tiled = True
                 if self.game.tile_select == 1:
                     self.straight_changer()
@@ -195,7 +187,7 @@ class BoardSquare(object):
                     self.push_changer()
                     self.tile_image_place(pusherp2_img)
                 self.active = False
-                self.game.player_turn = 1
+                self.turn_lose()
             self.game.tile_select = 0
 
     def reset_board(self):
@@ -215,7 +207,6 @@ class BoardSquare(object):
                     else:
                         square.active = False
                         square.square.config(bg="#BF9696")
-
 
     def diag_changer(self):
         self.reset_board()
@@ -252,6 +243,14 @@ class BoardSquare(object):
                     else:
                         square.square.config(bg="#B7DEB3")
 
+    def turn_lose(self):
+        for row in self.game.board.board_list:
+            for square in row:
+                if square.active and not square.tiled:
+                    self.game.player_turn *= -1
+                    return None
+        self.reset_board()
+
     def tile_image_place(self, image):
         self.square = tkinter.Label(self.board.board_edge, image=image)
         self.square.image = image
@@ -262,7 +261,7 @@ class BoardSquare(object):
             tile_label = tkinter.Frame(self.game.p1_tile_frame, height=104, width=104)
             tile_label.grid(row=self.game.tile_row, column=self.game.tile_select-1)
 
-        elif self.game.player_turn == 2:
+        elif self.game.player_turn == -1:
             tile_label = self.game.p2_tile_list[self.game.tile_row][self.game.tile_select-1].label
             tile_label.destroy()
             tile_label = tkinter.Frame(self.game.p2_tile_frame, height=104, width=104)
@@ -298,7 +297,7 @@ class Tile(object):
             elif self.type == 4:
                 self.tile_image(pusherp1_img, self.game.p1_tile_frame)
                 self.label.bind("<Button-1>", self.tile_selector)
-        if self.player_belongs == 2:
+        if self.player_belongs == -1:
             if self.type == 1:
                 self.tile_image(straightp2_img, self.game.p2_tile_frame)
                 self.label.bind("<Button-1>", self.tile_selector)
