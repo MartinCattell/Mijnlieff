@@ -41,56 +41,56 @@ class MainWindow(object):
         game_window.grab_set()
 
         game = Game(game_window, self.board_shape)
-        game.board_frame.grid(row=0, column=0, columnspan=2)
-        game.p1_tile_frame.grid(row=1, column=0)
-        game.p2_tile_frame.grid(row=1, column=1)
 
 
 class Game(object):
     def __init__(self, frame, board_shape):
-        self.board_frame = tkinter.Frame(frame)
-        self.board_frame.grid(row=1, column=0)
-        self.p1_tile_frame = tkinter.Frame(frame, height=50)
-        self.p1_tile_frame.grid(row=2, column=0)
-        self.p2_tile_frame = tkinter.Frame(frame, height=50)
-        self.p2_tile_frame.grid(row=2, column=1)
+        self.frame = frame
+        self.p1_message = tkinter.Label(self.frame, text="Player 1\n Place your tile", font="none 16 bold", anchor="w")
+        self.p2_message = tkinter.Label(self.frame, text="Player 2\n Place your tile", font="none 16 bold", anchor="e")
+        self.board_frame = tkinter.Frame(self.frame)
+        self.board_frame.grid(row=1, column=0, columnspan=2)
+        self.p1_tile_frame = tkinter.Frame(self.frame, height=50)
+        self.p1_tile_frame.grid(row=2, column=0, sticky="w")
+        self.p2_tile_frame = tkinter.Frame(self.frame, height=50)
+        self.p2_tile_frame.grid(row=2, column=1, sticky="e")
 
-        self.board = Board(board_shape, self)
-        self.board.board_edge.grid(row=0, column=0)
+        self.board = Board(self, board_shape)
 
-        self.p1_tile_list = [[Tile(1, 1, 0, self), Tile(2, 1, 0, self), Tile(3, 1, 0, self), Tile(4, 1, 0, self)],
-                             [Tile(1, 1, 1, self), Tile(2, 1, 1, self), Tile(3, 1, 1, self),  Tile(4, 1, 1, self)]]
-
-        self.p2_tile_list = [[Tile(1, -1, 0, self), Tile(2, -1, 0, self), Tile(3, -1, 0, self), Tile(4, -1, 0, self)],
-                             [Tile(1, -1, 1, self), Tile(2, -1, 1, self), Tile(3, -1, 1, self),  Tile(4, -1, 1, self)]]
-
-        self.p1_tile_list[0][0].label.grid(row=0, column=0)
-        self.p1_tile_list[0][1].label.grid(row=0, column=1)
-        self.p1_tile_list[0][2].label.grid(row=0, column=2)
-        self.p1_tile_list[0][3].label.grid(row=0, column=3)
-        self.p1_tile_list[1][0].label.grid(row=1, column=0)
-        self.p1_tile_list[1][1].label.grid(row=1, column=1)
-        self.p1_tile_list[1][2].label.grid(row=1, column=2)
-        self.p1_tile_list[1][3].label.grid(row=1, column=3)
-        self.p2_tile_list[0][0].label.grid(row=0, column=0)
-        self.p2_tile_list[0][1].label.grid(row=0, column=1)
-        self.p2_tile_list[0][2].label.grid(row=0, column=2)
-        self.p2_tile_list[0][3].label.grid(row=0, column=3)
-        self.p2_tile_list[1][0].label.grid(row=1, column=0)
-        self.p2_tile_list[1][1].label.grid(row=1, column=1)
-        self.p2_tile_list[1][2].label.grid(row=1, column=2)
-        self.p2_tile_list[1][3].label.grid(row=1, column=3)
+        self.p1_tile_set = TileSet(self, 1)
+        self.p2_tile_set = TileSet(self, -1)
 
         self.tile_select = 0
         self.tile_row = 0
-        self.player_turn = 1
+        self.player_turn = 1    # -1 for player 2, 1 for player 1
         self.player_belongs = 0
+        self.p1_tiles_remaining = 8
+        self.p2_tiles_remaining = 8
+        self.p1_tiles_placed = []
+        self.p2_tiles_placed = []
+        self.player_messenger()
+
+    def message_destroy(self):
+        if self.player_turn == 1:
+            self.p2_message.destroy()
+        else:
+            self.p1_message.destroy()
+
+    def player_messenger(self):
+        self.message_destroy()
+        if self.player_turn == 1:
+            self.p1_message = tkinter.Label(self.frame, text="Player 1\n Place your tile",
+                                            font="none 16 bold", anchor="w")
+            self.p1_message.grid(row=0, column=0, sticky="w")
+        else:
+            self.p2_message = tkinter.Label(self.frame, text="Player 2\n Place your tile",
+                                            font="none 16 bold", anchor="e")
+            self.p2_message.grid(row=0, column=1, sticky="e")
 
 
 class Board(object):
-    def __init__(self, shape, game):
+    def __init__(self, game, shape):
         self.game = game
-        self.board_edge = tkinter.Frame(game.board_frame)
         self.board_list = []
         if shape == 1:
             self.board_build1(4, 4)
@@ -116,7 +116,7 @@ class Board(object):
                 column_start = col_start2
                 column_end = col_end2
             for j in range(column_start, column_end):
-                b = BoardSquare(self, i, j, self.game)
+                b = BoardSquare(self.game, self, i, j)
                 row_list.append(b)
                 row_list[j-column_start].square.grid(row=i, column=j)
             self.board_list.append(row_list)
@@ -125,23 +125,40 @@ class Board(object):
         for i in range(rows):
             row_list = []
             for j in range(columns):
-                b = BoardSquare(self, i, j, self.game)
+                b = BoardSquare(self.game, self, i, j)
                 row_list.append(b)
                 row_list[j].square.grid(row=i, column=j)
             self.board_list.append(row_list)
 
 
+class TileSet(object):
+    def __init__(self, game, player):
+        self.game = game
+        self.player = player
+        self.tile_list = []
+        self.tile_set_builder()
+
+    def tile_set_builder(self):
+        for i in range(2):
+            row = []
+            for j in range(1, 5):
+                t = Tile(self.game, self, self.player, i, j)
+                t.label.grid(row=i, column=j-1)
+                row.append(t)
+            self.tile_list.append(row)
+
+
 class BoardSquare(object):
-    def __init__(self, board, row, column, game):
+    def __init__(self, game, board, row, column):
         side = 19
         height = 9
-        self.board = board
         self.game = game
+        self.board = board
         self.row = row
         self.column = column
-        self.square = tkinter.Label(self.board.board_edge, height=height, width=side, relief="groove")
-        self.active = True
+        self.square = tkinter.Label(self.game.board_frame, height=height, width=side, relief="groove")
         self.square.bind("<Button-1>", self.tile_placer)
+        self.active = True
         self.tiled = False
 
     def tile_placer(self, event):
@@ -157,41 +174,53 @@ class BoardSquare(object):
             if self.game.tile_select == 0:
                 pass
             elif self.game.player_turn == 1:
+                self.game.p1_tiles_remaining -= 1
                 self.tiled = True
+                self.game.p1_tiles_placed.append([self.row, self.column])
+                print(self.game.p1_tiles_remaining)
+                print(self.game.p1_tiles_placed)
+                print("")
                 if self.game.tile_select == 1:
                     self.straight_changer()
-                    self.tile_image_place(straightp1_img)
+                    self.tile_image_move(straightp1_img)
                 elif self.game.tile_select == 2:
                     self.diag_changer()
-                    self.tile_image_place(diagonalp1_img)
+                    self.tile_image_move(diagonalp1_img)
                 elif self.game.tile_select == 3:
                     self.pull_changer()
-                    self.tile_image_place(pullerp1_img)
+                    self.tile_image_move(pullerp1_img)
                 elif self.game.tile_select == 4:
                     self.push_changer()
-                    self.tile_image_place(pusherp1_img)
+                    self.tile_image_move(pusherp1_img)
                 self.active = False
                 self.turn_lose()
+                self.game.player_messenger()
             elif self.game.player_turn == -1:
+                self.game.p2_tiles_remaining -= 1
                 self.tiled = True
+                self.game.p2_tiles_placed.append([self.row, self.column])
+                print(self.game.p2_tiles_remaining)
+                print(self.game.p2_tiles_placed)
+                print("")
                 if self.game.tile_select == 1:
                     self.straight_changer()
-                    self.tile_image_place(straightp2_img)
+                    self.tile_image_move(straightp2_img)
                 elif self.game.tile_select == 2:
                     self.diag_changer()
-                    self.tile_image_place(diagonalp2_img)
+                    self.tile_image_move(diagonalp2_img)
                 elif self.game.tile_select == 3:
                     self.pull_changer()
-                    self.tile_image_place(pullerp2_img)
+                    self.tile_image_move(pullerp2_img)
                 elif self.game.tile_select == 4:
                     self.push_changer()
-                    self.tile_image_place(pusherp2_img)
+                    self.tile_image_move(pusherp2_img)
                 self.active = False
                 self.turn_lose()
+                self.game.player_messenger()
             self.game.tile_select = 0
 
     def reset_board(self):
-        for row in self.game.board.board_list:
+        for row in self.board.board_list:
             for square in row:
                 square.square.config(bg="SystemButtonFace")
                 if not square.tiled:
@@ -199,7 +228,7 @@ class BoardSquare(object):
 
     def straight_changer(self):
         self.reset_board()
-        for row in self.game.board.board_list:
+        for row in self.board.board_list:
             for square in row:
                 if not square.tiled:
                     if square.row == self.row or square.column == self.column:
@@ -210,7 +239,7 @@ class BoardSquare(object):
 
     def diag_changer(self):
         self.reset_board()
-        for row in self.game.board.board_list:
+        for row in self.board.board_list:
             c_1 = self.column - self.row
             c_2 = self.column + self.row
             for square in row:
@@ -234,7 +263,7 @@ class BoardSquare(object):
 
     def push_changer(self):
         self.reset_board()
-        for row in self.game.board.board_list:
+        for row in self.board.board_list:
             for square in row:
                 if not square.tiled:
                     if self.column - 1 <= square.column <= self.column+1 and self.row - 1 <= square.row <= self.row + 1:
@@ -244,32 +273,32 @@ class BoardSquare(object):
                         square.square.config(bg="#B7DEB3")
 
     def turn_lose(self):
-        for row in self.game.board.board_list:
+        for row in self.board.board_list:
             for square in row:
                 if square.active and not square.tiled:
                     self.game.player_turn *= -1
                     return None
         self.reset_board()
 
-    def tile_image_place(self, image):
-        self.square = tkinter.Label(self.board.board_edge, image=image)
+    def tile_image_move(self, image):
+        self.square = tkinter.Label(self.game.board_frame, image=image)
         self.square.image = image
         self.square.grid(row=self.row, column=self.column)
         if self.game.player_turn == 1:
-            tile_label = self.game.p1_tile_list[self.game.tile_row][self.game.tile_select-1].label
+            tile_label = self.game.p1_tile_set.tile_list[self.game.tile_row][self.game.tile_select-1].label
             tile_label.destroy()
             tile_label = tkinter.Frame(self.game.p1_tile_frame, height=104, width=104)
             tile_label.grid(row=self.game.tile_row, column=self.game.tile_select-1)
 
         elif self.game.player_turn == -1:
-            tile_label = self.game.p2_tile_list[self.game.tile_row][self.game.tile_select-1].label
+            tile_label = self.game.p2_tile_set.tile_list[self.game.tile_row][self.game.tile_select-1].label
             tile_label.destroy()
             tile_label = tkinter.Frame(self.game.p2_tile_frame, height=104, width=104)
             tile_label.grid(row=self.game.tile_row, column=self.game.tile_select-1)
 
 
 class Tile(object):
-    def __init__(self, typ, p, row, game):
+    def __init__(self, game, t_set, p, row, typ):
         straightp1_img = tkinter.PhotoImage(file="straightp1.gif")
         diagonalp1_img = tkinter.PhotoImage(file="diagonalp1.gif")
         pullerp1_img = tkinter.PhotoImage(file="pullerp1.gif")
@@ -278,51 +307,42 @@ class Tile(object):
         diagonalp2_img = tkinter.PhotoImage(file="diagonalp2.gif")
         pullerp2_img = tkinter.PhotoImage(file="pullerp2.gif")
         pusherp2_img = tkinter.PhotoImage(file="pusherp2.gif")
+        self.tile_set = t_set
         self.game = game
-        self.tile_window = None
         self.label = None
         self.player_belongs = p
         self.type = typ
         self.row = row
         if self.player_belongs == 1:
             if self.type == 1:
-                self.tile_image(straightp1_img, self.game.p1_tile_frame)
-                self.label.bind("<Button-1>", self.tile_selector)
+                self.tile_definer(straightp1_img, self.game.p1_tile_frame)
             elif self.type == 2:
-                self.tile_image(diagonalp1_img, self.game.p1_tile_frame)
-                self.label.bind("<Button-1>", self.tile_selector)
+                self.tile_definer(diagonalp1_img, self.game.p1_tile_frame)
             elif self.type == 3:
-                self.tile_image(pullerp1_img, self.game.p1_tile_frame)
-                self.label.bind("<Button-1>", self.tile_selector)
+                self.tile_definer(pullerp1_img, self.game.p1_tile_frame)
             elif self.type == 4:
-                self.tile_image(pusherp1_img, self.game.p1_tile_frame)
-                self.label.bind("<Button-1>", self.tile_selector)
+                self.tile_definer(pusherp1_img, self.game.p1_tile_frame)
         if self.player_belongs == -1:
             if self.type == 1:
-                self.tile_image(straightp2_img, self.game.p2_tile_frame)
-                self.label.bind("<Button-1>", self.tile_selector)
+                self.tile_definer(straightp2_img, self.game.p2_tile_frame)
             elif self.type == 2:
-                self.tile_image(diagonalp2_img, self.game.p2_tile_frame)
-                self.label.bind("<Button-1>", self.tile_selector)
+                self.tile_definer(diagonalp2_img, self.game.p2_tile_frame)
             elif self.type == 3:
-                self.tile_image(pullerp2_img, self.game.p2_tile_frame)
-                self.label.bind("<Button-1>", self.tile_selector)
+                self.tile_definer(pullerp2_img, self.game.p2_tile_frame)
             elif self.type == 4:
-                self.tile_image(pusherp2_img, self.game.p2_tile_frame)
-                self.label.bind("<Button-1>", self.tile_selector)
+                self.tile_definer(pusherp2_img, self.game.p2_tile_frame)
 
-    def tile_image(self, image, frame):
+    def tile_definer(self, image, frame):
         self.label = tkinter.Label(frame, image=image)
         self.label.image = image
+        self.label.bind("<Button-1>", self.tile_selector)
 
     def tile_selector(self, event):
         if self.player_belongs == self.game.player_turn:
             self.game.tile_select = self.type
             self.game.tile_row = self.row
-        else:
-            self.game.tile_select = 0
-
-
+        # else:
+        #     self.game.tile_select = 0
 
 main_window = MainWindow()
 main_window.root.mainloop()
