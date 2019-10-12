@@ -5,16 +5,18 @@ class MainWindow(object):
 
     def __init__(self):
         self.root = tkinter.Tk()
+        self.root.config(bg="#D4BFA8")
         self.root.title("Mijnlieff")
         self.root.resizable(0, 0)
-        self.new_game_button = tkinter.Button(self.root, text="Start Game", font="veranda 14 bold",
-                                              command=self.start_game)
-        self.new_game_button.grid(row=0, column=0)
+        self.mijlieff = tkinter.Label(self.root, text="Mijnlieff", font=("gothic", 24, "bold"), bg="#D4BFA8").grid(row=0, column=0)
+        self.new_game_button = tkinter.Button(self.root, text="Start Game", font="msserif 14",
+                                              command=self.start_game, bg="#A18B73")
+        self.new_game_button.grid(row=3, column=0)
         self.menu_image = tkinter.PhotoImage(file="Square.gif")
-        self.shape_button = tkinter.Button(self.root, image=self.menu_image, font="verdana 10 bold",
+        self.shape_button = tkinter.Button(self.root, image=self.menu_image, font="msserif 10",
                                            command=self.shape_changer)
         self.shape_button.grid(row=2, column=0)
-        self.shape_label = tkinter.Label(self.root, text="Select a board shape", font="verdana 8")
+        self.shape_label = tkinter.Label(self.root, text="Select a board shape", font="msserif 8", bg="#D4BFA8")
         self.shape_label.grid(row=1, column=0)
         self.board_shape = 1
 
@@ -37,7 +39,7 @@ class MainWindow(object):
         self.shape_button.grid(row=2, column=0)
 
     def start_game(self):
-        game_window = tkinter.Toplevel(self.root, bg="#A6A599")
+        game_window = tkinter.Toplevel( bg="#D4BFA8")
         game_window.title("Mijnlieff")
         game_window.resizable(0,0)
         game_window.grab_set()
@@ -50,17 +52,26 @@ class Game(object):
         self.frame = frame
         self.player_turn = 1    # -1 for player 2, 1 for player 1
         self.turn = 0
+
         self.p1_message = tkinter.Label(self.frame, text="Player 1\n Place your tile",
-                                        font="none 20 bold", anchor="w", bg="#B7DEB3")
+                                        font="none 20 bold", anchor="w", bg="#D4BFA8")
         self.p2_message = tkinter.Label(self.frame, text="Player 2\n Place your tile",
-                                        font="none 20 bold", anchor="e", bg="#B7DEB3")
+                                        font="none 20 bold", anchor="e", bg="#D4BFA8")
         self.player_messenger()
-        self.board_frame = tkinter.Frame(self.frame)
-        self.board_frame.grid(row=1, column=0, columnspan=2)
-        self.p1_tile_frame = tkinter.Frame(self.frame, height=50)
-        self.p1_tile_frame.grid(row=2, column=0, sticky="w")
-        self.p2_tile_frame = tkinter.Frame(self.frame, height=50)
-        self.p2_tile_frame.grid(row=2, column=1, sticky="e")
+        if board_shape > 1:
+            self.board_frame = tkinter.Frame(self.frame, bg="#D4BFA8")
+            self.board_frame.grid(row=1, column=1, columnspan=2)
+            self.p1_tile_frame = tkinter.Frame(self.frame)
+            self.p1_tile_frame.grid(row=2, column=1, sticky="w")
+            self.p2_tile_frame = tkinter.Frame(self.frame)
+            self.p2_tile_frame.grid(row=2, column=2, sticky="e")
+        else:
+            self.board_frame = tkinter.Frame(self.frame, bg="#A6A599")
+            self.board_frame.grid(row=1, column=1, columnspan=2)
+            self.p1_tile_frame = tkinter.Frame(self.frame)
+            self.p1_tile_frame.grid(row=2, column=0, sticky="w")
+            self.p2_tile_frame = tkinter.Frame(self.frame)
+            self.p2_tile_frame.grid(row=2, column=3, sticky="e")
 
         self.board = Board(self, board_shape)
 
@@ -79,6 +90,10 @@ class Game(object):
         self.p2_lines_list = []
         self.p1_score = 0
         self.p2_score = 0
+        self.p1_score_label = tkinter.Label(self.frame, text="Player 1 score: " + str(self.p1_score), width=40, bg="#A9977A")
+        self.p2_score_label = tkinter.Label(self.frame, text="Player 2 score: " + str(self.p2_score), width=40, bg="#A9977A")
+        self.p1_score_label.grid(row=0, column=0, sticky="w")
+        self.p2_score_label.grid(row=0, column=3, sticky="e")
 
     def line_checker(self, placed_list, lines_list):
         if self.turn >= 5:
@@ -131,8 +146,10 @@ class Game(object):
                                     self.p2_score -= len(l)-2
                         if self.player_turn == 1:
                             self.p1_score += len(line)-2
+                            self.p1_score_label.config(text="Player 1 score: " + str(self.p1_score))
                         else:
                             self.p2_score += len(line)-2
+                            self.p2_score_label.config(text="Player 2 score: " + str(self.p2_score))
                         lines_list.append(line)
             for line in straight_master2:
                 for n in range(1, len(line)-1):
@@ -146,8 +163,10 @@ class Game(object):
                                     self.p2_score -= len(l)-2
                         if self.player_turn == 1:
                             self.p1_score += len(line)-2
+                            self.p1_score_label.config(text="Player 1 score: " + str(self.p1_score))
                         else:
                             self.p2_score += len(line)-2
+                            self.p2_score_label.config(text="Player 2 score: " + str(self.p2_score))
                         lines_list.append(line)
             for line in diagonal_master1:
                 for n in range(1, len(line)-1):
@@ -161,8 +180,10 @@ class Game(object):
                                     self.p2_score -= len(l)-2
                         if self.player_turn == 1:
                             self.p1_score += len(line)-2
+                            self.p1_score_label.config(text="Player 1 score: " + str(self.p1_score))
                         else:
                             self.p2_score += len(line)-2
+                            self.p2_score_label.config(text="Player 2 score: " + str(self.p2_score))
                         lines_list.append(line)
             for line in diagonal_master2:
                 for n in range(1, len(line)-1):
@@ -176,8 +197,10 @@ class Game(object):
                                     self.p2_score -= len(l)-2
                         if self.player_turn == 1:
                             self.p1_score += len(line)-2
+                            self.p1_score_label.config(text="Player 1 score: " + str(self.p1_score))
                         else:
                             self.p2_score += len(line)-2
+                            self.p2_score_label.config(text="Player 2 score: " + str(self.p2_score))
                         lines_list.append(line)
 
     def message_destroy(self, message):
@@ -186,22 +209,22 @@ class Game(object):
     def player_messenger(self):
         if self.player_turn == 1:
             self.p1_message = tkinter.Label(self.frame, text="Player 1\n Place your tile",
-                                            font="none 20 bold", anchor="w", bg="#B7DEB3")
-            self.p1_message.grid(row=0, column=0, sticky="w")
+                                            font="gothic 20 bold", anchor="w", bg="#D4BFA8")
+            self.p1_message.grid(row=1, column=0)
         else:
             self.p2_message = tkinter.Label(self.frame, text="Player 2\n Place your tile",
-                                            font="none 20 bold", anchor="e", bg="#B7DEB3")
-            self.p2_message.grid(row=0, column=1, sticky="e")
+                                            font="gothic 20 bold", anchor="e", bg="#D4BFA8")
+            self.p2_message.grid(row=1, column=3)
 
     def win_message(self):
         p1_label = tkinter.Label(self.frame, text="Player 1 score: "+str(self.p1_score), font="none 18 bold").grid(row=0, column=0, sticky="w")
         p2_label = tkinter.Label(self.frame, text="Player 2 score: "+str(self.p2_score), font="none 18 bold").grid(row=0, column=1, sticky="e")
         if self.p1_score > self.p2_score:
-            win_label = tkinter.Label(self.board_frame, text="Congratulations\n Player 1!\n You Win!", font="none 18 bold").grid(row=1, column=1, columnspan=2)
+            win_label = tkinter.Label(self.board_frame, text="Congratulations\n Player 1!\n You Win!", font="gothic 18 bold").grid(row=1, column=1, columnspan=2)
         elif self.p2_score > self.p1_score:
-            win_label = tkinter.Label(self.board_frame, text="Congratulations\n Player 2!\n You Win!", font="none 18 bold").grid(row=1, column=1, columnspan=2)
+            win_label = tkinter.Label(self.board_frame, text="Congratulations\n Player 2!\n You Win!", font="gothic 18 bold").grid(row=1, column=1, columnspan=2)
         else:
-            win_label = tkinter.Label(self.board_frame, text="Good Game!\n It's a Draw", font="none 18 bold").grid(row=1, column=1, columnspan=2)
+            win_label = tkinter.Label(self.board_frame, text="Good Game!\n It's a Draw", font="gothic 18 bold").grid(row=1, column=1, columnspan=2)
 
 class Board(object):
     def __init__(self, game, shape):
