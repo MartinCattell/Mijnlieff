@@ -134,74 +134,58 @@ class Game(object):
                     diagonal_list2.sort()
                     if diagonal_list2 not in diagonal_master2:
                         diagonal_master2.append(diagonal_list2)
+            print(straight_master1)
+            print(straight_master2)
+            print(diagonal_master1)
+            print(diagonal_master2)
             for line in straight_master1:
                 for n in range(1, len(line)-1):
                     if line[n+1][1] == line[n][1] + 1 and line[n][1] == line[n-1][1] + 1:
-                        for l in lines_list:
-                            if l[0] in line and l[1] in line:
-                                lines_list.remove(l)
-                                if self.player_turn == 1:
-                                    self.p1_score -= len(l)-2
-                                else:
-                                    self.p2_score -= len(l)-2
-                        if self.player_turn == 1:
-                            self.p1_score += len(line)-2
-                            self.p1_score_label.config(text="Player 1 score: " + str(self.p1_score))
-                        else:
-                            self.p2_score += len(line)-2
-                            self.p2_score_label.config(text="Player 2 score: " + str(self.p2_score))
-                        lines_list.append(line)
+                        new_line = [line[n-1], line[n], line[n+1]]
+                        if new_line not in lines_list:
+                            lines_list.append(new_line)
+                            if self.player_turn == 1:
+                                self.p1_score += 1
+                                self.p1_score_label.config(text="Player 1 score: " + str(self.p1_score))
+                            else:
+                                self.p2_score += 1
+                                self.p2_score_label.config(text="Player 2 score: " + str(self.p2_score))
             for line in straight_master2:
                 for n in range(1, len(line)-1):
                     if line[n+1][0] == line[n][0] + 1 and line[n][0] == line[n-1][0] + 1:
-                        for l in lines_list:
-                            if l[0] in line and l[1] in line:
-                                lines_list.remove(l)
-                                if self.player_turn == 1:
-                                    self.p1_score -= len(l)-2
-                                else:
-                                    self.p2_score -= len(l)-2
-                        if self.player_turn == 1:
-                            self.p1_score += len(line)-2
-                            self.p1_score_label.config(text="Player 1 score: " + str(self.p1_score))
-                        else:
-                            self.p2_score += len(line)-2
-                            self.p2_score_label.config(text="Player 2 score: " + str(self.p2_score))
-                        lines_list.append(line)
+                        new_line = [line[n-1], line[n], line[n+1]]
+                        if new_line not in lines_list:
+                            lines_list.append(new_line)
+                            if self.player_turn == 1:
+                                self.p1_score += 1
+                                self.p1_score_label.config(text="Player 1 score: " + str(self.p1_score))
+                            else:
+                                self.p2_score += 1
+                                self.p2_score_label.config(text="Player 2 score: " + str(self.p2_score))
             for line in diagonal_master1:
                 for n in range(1, len(line)-1):
                     if line[n+1][1] == line[n][1] + 1 and line[n][1] == line[n-1][1] + 1:
-                        for l in lines_list:
-                            if l[0] in line and l[1] in line:
-                                lines_list.remove(l)
-                                if self.player_turn == 1:
-                                    self.p1_score -= len(l)-2
-                                else:
-                                    self.p2_score -= len(l)-2
-                        if self.player_turn == 1:
-                            self.p1_score += len(line)-2
-                            self.p1_score_label.config(text="Player 1 score: " + str(self.p1_score))
-                        else:
-                            self.p2_score += len(line)-2
-                            self.p2_score_label.config(text="Player 2 score: " + str(self.p2_score))
-                        lines_list.append(line)
+                        new_line = [line[n-1], line[n], line[n+1]]
+                        if new_line not in lines_list:
+                            lines_list.append(new_line)
+                            if self.player_turn == 1:
+                                self.p1_score += 1
+                                self.p1_score_label.config(text="Player 1 score: " + str(self.p1_score))
+                            else:
+                                self.p2_score += 1
+                                self.p2_score_label.config(text="Player 2 score: " + str(self.p2_score))
             for line in diagonal_master2:
                 for n in range(1, len(line)-1):
                     if line[n+1][0] == line[n][0] + 1 and line[n][0] == line[n-1][0] + 1:
-                        for l in lines_list:
-                            if l[0] in line and l[1] in line:
-                                lines_list.remove(l)
-                                if self.player_turn == 1:
-                                    self.p1_score -= len(l)-2
-                                else:
-                                    self.p2_score -= len(l)-2
-                        if self.player_turn == 1:
-                            self.p1_score += len(line)-2
-                            self.p1_score_label.config(text="Player 1 score: " + str(self.p1_score))
-                        else:
-                            self.p2_score += len(line)-2
-                            self.p2_score_label.config(text="Player 2 score: " + str(self.p2_score))
-                        lines_list.append(line)
+                        new_line = [line[n-1], line[n], line[n+1]]
+                        if new_line not in lines_list:
+                            lines_list.append(new_line)
+                            if self.player_turn == 1:
+                                self.p1_score += 1
+                                self.p1_score_label.config(text="Player 1 score: " + str(self.p1_score))
+                            else:
+                                self.p2_score += 1
+                                self.p2_score_label.config(text="Player 2 score: " + str(self.p2_score))
 
     def message_destroy(self, message):
         message.destroy()
@@ -218,7 +202,7 @@ class Game(object):
 
     def win_message(self):
         p1_label = tkinter.Label(self.frame, text="Player 1 score: "+str(self.p1_score), font="none 18 bold").grid(row=0, column=0, sticky="w")
-        p2_label = tkinter.Label(self.frame, text="Player 2 score: "+str(self.p2_score), font="none 18 bold").grid(row=0, column=1, sticky="e")
+        p2_label = tkinter.Label(self.frame, text="Player 2 score: "+str(self.p2_score), font="none 18 bold").grid(row=0, column=3, sticky="e")
         if self.p1_score > self.p2_score:
             win_label = tkinter.Label(self.board_frame, text="Congratulations\n Player 1!\n You Win!", font="gothic 18 bold").grid(row=1, column=1, columnspan=2)
         elif self.p2_score > self.p1_score:
